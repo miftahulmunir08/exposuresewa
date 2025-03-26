@@ -67,7 +67,7 @@
         Manajemen Order
     </div>
 
-    <li class="nav-item">
+    <li class="nav-item {{ $menu_active == 'transaksi' ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('transaction') }}">
             <i class="fas fa-fw fa-chart-area"></i>
             <span>Transaksi</span></a>

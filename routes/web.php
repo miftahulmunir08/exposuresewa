@@ -5,6 +5,7 @@ use App\Http\Controllers\Master\CategoryController;
 use App\Http\Controllers\Master\CustomerController;
 use App\Http\Controllers\Master\ProductController;
 use App\Http\Controllers\Stock\StockController;
+use App\Http\Controllers\Transaction\TransactionCartController;
 use App\Http\Controllers\Transaction\TransactionController;
 use App\Http\Controllers\Utility\UtilityController;
 use Illuminate\Support\Facades\Request;
@@ -37,6 +38,7 @@ Route::group(['prefix' => 'stock', 'middleware' => 'auth'], function () {
 
 Route::group(['prefix' => 'transaction', 'middleware' => 'auth'], function () {
     Route::get('/', [TransactionController::class, 'index'])->name('transaction');
+    Route::get('/detail/{transaction_code}', [TransactionController::class, 'detail'])->name('transaction.detail');
 });
 
 
@@ -46,15 +48,19 @@ Route::group(['prefix' => 'api', 'middleware' => 'auth:sanctum'], function () {
     Route::apiResource('categories', CT\Master\CategoryController::class);
     Route::apiResource('products', CT\Master\ProductController::class);
     Route::apiResource('stocks', CT\Stock\StockController::class);
+    Route::apiResource('transactions', CT\Transaction\TransactionController::class);
 
 
     Route::get('/customer/data', [CustomerController::class, 'getData'])->name('data.customer');
     Route::get('/category/data', [CategoryController::class, 'getData'])->name('data.category');
     Route::get('/product/data', [ProductController::class, 'getData'])->name('data.product');
     Route::get('/stock/data', [StockController::class, 'getData'])->name('data.stock');
+    Route::get('/transaction/data', [TransactionController::class, 'getData'])->name('data.transaction');
+    Route::get('/transaction-cart/data/{transaction_code}', [TransactionCartController::class, 'getData'])->name('data.transaction-cart');
 
 
     Route::get('/category/all', [CategoryController::class, 'getAll'])->name('data.category.all');
     Route::get('/product/all', [ProductController::class, 'getAll'])->name('data.product.all');
+    Route::get('/customer/all', [CustomerController::class, 'getAll'])->name('data.customer.all');
     Route::get('/utility/allstatus', [UtilityController::class, 'getAllStatusStock'])->name('data.utility.all_status');
 });

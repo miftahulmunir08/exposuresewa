@@ -14,11 +14,14 @@ return new class extends Migration
         Schema::create('data_transaction', function (Blueprint $table) {
             $table->id();
             $table->string('transaction_code')->unique();
+            $table->string('customer_id');
             $table->date('tanggal_pinjam');
             $table->date('tanggal_kembali')->nullable();
-            $table->enum('status', ['dipinjam', 'dikembalikan'])->default('dipinjam');
+            $table->enum('status', ['dipinjam', 'dikembalikan', 'unfinish']);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreign('customer_id')->references('uuid')->on('master_customer');
         });
     }
 
