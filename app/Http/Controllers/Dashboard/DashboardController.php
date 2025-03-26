@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -13,6 +14,8 @@ class DashboardController extends Controller
     public function index()
     {
         //
+        // $vendor_id = Auth::user()["vendor_id"];
+        // dd($vendor_id);
         $data['menu_active'] = 'dashboard';
         return view('dashboard/index', $data);
         // dd("sudah di dashboard");

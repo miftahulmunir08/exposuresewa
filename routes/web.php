@@ -49,6 +49,7 @@ Route::group(['prefix' => 'api', 'middleware' => 'auth:sanctum'], function () {
     Route::apiResource('products', CT\Master\ProductController::class);
     Route::apiResource('stocks', CT\Stock\StockController::class);
     Route::apiResource('transactions', CT\Transaction\TransactionController::class);
+    Route::apiResource('transactions-cart', CT\Transaction\TransactionCartController::class);
 
 
     Route::get('/customer/data', [CustomerController::class, 'getData'])->name('data.customer');
@@ -56,7 +57,7 @@ Route::group(['prefix' => 'api', 'middleware' => 'auth:sanctum'], function () {
     Route::get('/product/data', [ProductController::class, 'getData'])->name('data.product');
     Route::get('/stock/data', [StockController::class, 'getData'])->name('data.stock');
     Route::get('/transaction/data', [TransactionController::class, 'getData'])->name('data.transaction');
-    Route::get('/transaction-cart/data/{transaction_code}', [TransactionCartController::class, 'getData'])->name('data.transaction-cart');
+    Route::get('/transaction-cart/data', [TransactionCartController::class, 'getData'])->name('data.transaction-cart');
 
 
     Route::get('/category/all', [CategoryController::class, 'getAll'])->name('data.category.all');
