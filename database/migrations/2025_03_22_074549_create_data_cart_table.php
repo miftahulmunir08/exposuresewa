@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('qty');
             $table->string('price');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

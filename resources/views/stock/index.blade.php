@@ -8,12 +8,12 @@
         </div>
         <div class="card-body">
             <div class="float-right mb-4">
-                <button href="#" class="btn btn-primary text-end" onclick="add()"><i class="fa fa-plus"></i>
-                    Tambah Product</button>
+                <button href="#" class="btn btn-primary text-end" onclick="add()"><i class="fa fa-wrench"></i>
+                    Atur Stock</button>
             </div>
 
             <div class="table-responsive">
-                <table class="table table-bordered" id="table-product" width="100%" cellspacing="0">
+                <table class="table table-bordered" id="table-stock" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>No</th>
@@ -26,36 +26,38 @@
                 </table>
             </div>
 
-            <div class="modal" id="modal-product" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal" id="modal-stock" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Add Customer</h5>
+                            <h5 class="modal-title">Setting Stock</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <form id="customer_form">
+                        <form id="stock_form">
                             <div class="modal-body">
 
                                 <div class="form-group">
-                                    <label for="product_category">Category</label>
-                                    <select name="product_category" id="category-select2" class="form-select select2" style="width: 100%;">
+                                    <label for="product_name">Product</label>
+                                    <select name="product_name" id="product-select2" class="form-select select2" style="width: 100%;">
                                         <option value="" disabled selected>Select a category</option>
                                     </select>
-                                    <small id="error_category" class="form-text text-danger">We'll never share your email with anyone else.</small>
+                                    <small id="error_product" class="form-text text-danger">We'll never share your email with anyone else.</small>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="product_name">Name</label>
-                                    <input name="product_name" type="text" class="form-control" id="product_name" aria-describedby="emailHelp" placeholder="Enter Name">
-                                    <small id="error_name" class="form-text text-danger">We'll never share your email with anyone else.</small>
+                                    <label for="product_qty">Qty</label>
+                                    <input name="product_qty" type="text" class="form-control" id="product_qty" aria-describedby="emailHelp" placeholder="Enter QTY">
+                                    <small id="error_qty" class="form-text text-danger">We'll never share your email with anyone else.</small>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="product_price">Harga</label>
-                                    <input name="product_price" type="text" class="form-control" id="product_price" aria-describedby="emailHelp" placeholder="Enter Price">
-                                    <small id="error_price" class="form-text text-danger">We'll never share your email with anyone else.</small>
+                                    <label for="product_status">Status</label>
+                                    <select name="product_status" id="status-select2" class="form-select select2" style="width: 100%;">
+                                        <option value="" disabled selected>Select a Status</option>
+                                    </select>
+                                    <small id="error_status" class="form-text text-danger">We'll never share your email with anyone else.</small>
                                 </div>
 
                             </div>
@@ -77,8 +79,8 @@
 @section('js_script')
 <script>
     var table;
-    var modal = $('#modal-category');
-    var formData = $('#customer_form');
+    var modal = $('#modal-stock');
+    var formData = $('#stock_form');
     var saveData;
     var id_category;
     var url, method;
@@ -93,15 +95,16 @@
 
     $(document).ready(function() {
         loadData();
-        getCategory();
-        $('#error_name').css('visibility', 'hidden');
-        $('#error_category').css('visibility', 'hidden');
-        $('#error_price').css('visibility', 'hidden');
+        getProduct();
+        getStatus();
+        $('#error_product').css('visibility', 'hidden');
+        $('#error_qty').css('visibility', 'hidden');
+        $('#error_status').css('visibility', 'hidden');
     });
 
     function loadData() {
 
-        $('#table-product').DataTable({
+        $('#table-stock').DataTable({
             bDestroy: true,
             searching: true,
             processing: true,
@@ -109,7 +112,7 @@
             responsive: true,
             ordering: true,
             serverSide: true,
-            ajax: "{{ route('data.product') }}",
+            ajax: "{{ route('data.stock') }}",
             columns: [{
                     data: 'DT_RowIndex',
                     name: 'no',
@@ -117,16 +120,16 @@
                     searchable: false
                 },
                 {
-                    data: 'name',
+                    data: 'product.name',
                     name: 'name'
                 },
                 {
-                    data: 'category.name',
-                    name: 'category'
+                    data: 'qty',
+                    name: 'qty'
                 },
                 {
-                    data: 'harga',
-                    name: 'harga'
+                    data: 'status',
+                    name: 'status'
                 },
                 {
                     data: 'action',
@@ -138,8 +141,8 @@
         });
     }
 
-    function getCategory(category_id = null) {
-        let url = "{{ route('data.category.all')}}"; // Ambil semua kategori
+    function getProduct(product_id = null) {
+        let url = "{{ route('data.product.all')}}"; // Ambil semua kategori
 
         $.ajax({
             url: url,
@@ -148,14 +151,14 @@
                 // console.log(response);
                 // if (!response.data) return console.error('Invalid response format:', response);
 
-                let html = '<option value="">Silahkan Pilih Category</option>';
-                response.data.forEach(category => {
-                    let selected = (category_id && category.uuid == category_id) ? ' selected' : '';
-                    html += `<option value="${category.uuid}"${selected}>${category.name}</option>`;
+                let html = '<option value="">Silahkan Pilih Product</option>';
+                response.data.forEach(product => {
+                    let selected = (product_id && product.uuid == product_id) ? ' selected' : '';
+                    html += `<option value="${product.uuid}"${selected}>${product.name}</option>`;
                 });
 
-                $("#category-select2").html(html).select2({
-                    placeholder: "Pilih Category",
+                $("#product-select2").html(html).select2({
+                    placeholder: "Pilih Product",
                     allowClear: true,
                     width: "100%"
                 });
@@ -166,13 +169,42 @@
         });
     }
 
+    function getStatus(status_id = null) {
+        let url = "{{ route('data.utility.all_status')}}"; // Ambil semua kategori
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(response) {
+                // console.log(response);
+                // if (!response.data) return console.error('Invalid response format:', response);
+                let html = '<option value="">Silahkan Pilih Status</option>';
+
+                response.data.forEach(status => {
+                    let selected = (status_id && status.name == status_id) ? ' selected' : '';
+                    html += `<option value="${status.name}"${selected}>${status.name}</option>`;
+                });
+
+                $("#status-select2").html(html).select2({
+                    placeholder: "Pilih Status",
+                    allowClear: true,
+                    width: "100%"
+                });
+
+            },
+            error: function(error) {
+                console.error('Error fetching status:', error);
+            }
+        })
+    }
+
 
     function add() {
         saveData = 'add';
-        $('#modal-product').modal('show');
+        $('#modal-stock').modal('show');
         formData[0].reset();
-        $(".modal-title").text("Tambah Product");
-        $(".add-customer").text("Tambah");
+        $(".modal-title").text("Setting Stock");
+        $(".add-customer").text("Setting");
     }
 
     function byid(id) {
@@ -181,20 +213,20 @@
         id_customer = id;
         saveData = 'edit';
 
-        $('#modal-product').modal('show');
-        $(".modal-title").text("Update Product");
+        $('#modal-stock').modal('show');
+        $(".modal-title").text("Update Stock");
         $(".add-product").text("Update");
 
         $.ajax({
-            url: "{{ route('products.show', ':uuid') }}".replace(':uuid', uuid),
+            url: "{{ route('stocks.show', ':uuid') }}".replace(':uuid', uuid),
             method: 'get',
             dataType: "json",
             data: formData,
             success: function(response) {
-                console.log(response);
-                $("#product_name").val(response.data.name);
-                $("#product_price").val(response.data.harga);
-                getCategory(response.data.category_id);
+
+                getProduct(response.data.product_id);
+                getStatus(response.data.status);
+                $("#product_qty").val(response.data.qty);
             },
             error: function(response) {
 
@@ -225,7 +257,7 @@
             if (result.isConfirmed) {
 
                 if (saveData == 'delete') {
-                    url = "{{ route('products.destroy', ':uuid') }}";
+                    url = "{{ route('stocks.destroy', ':uuid') }}";
                     url = url.replace(':uuid', id);
                     method = 'DELETE';
                 }
@@ -242,8 +274,8 @@
                     },
                     success: function(response) {
                         console.log(response);
-                        $('#modal-product').hide();
-                        $('#modal-product').modal('hide');
+                        $('#modal-stock').hide();
+                        $('#modal-stock').modal('hide');
                         loadData();
                         Swal.fire({
                             title: saveData + " Data Berhasil",
@@ -271,15 +303,13 @@
         const formData = new FormData(this);
         if (saveData == 'add') {
             method = 'POST';
-            url = "{{ route('products.store') }}";
+            url = "{{ route('stocks.store') }}";
         } else if (saveData == 'edit') {
-            url = "{{ route('products.update', ':uuid') }}";
+            url = "{{ route('stocks.update', ':uuid') }}";
             url = url.replace(':uuid', id_customer);
             method = 'PUT';
         } else if (saveData == 'delete') {
-            url = "{{ route('products.update', ':uuid') }}";
-            url = url.replace(':uuid', id_customer);
-            method = 'DELETE';
+
         }
 
         if (saveData == 'edit') {
@@ -287,7 +317,6 @@
         } else if (saveData == 'delete') {
             formData.append('_method', 'DELETE');
         }
-
 
         $.ajax({
             url: url,
@@ -299,8 +328,8 @@
             dataType: 'json',
             success: function(response) {
                 console.log(response);
-                $('#modal-product').hide();
-                $('#modal-product').modal('hide');
+                $('#modal-stock').hide();
+                $('#modal-stock').modal('hide');
                 loadData();
                 Swal.fire({
                     title: saveData + " Data Berhasil",
@@ -312,15 +341,15 @@
                 console.log(response);
 
                 if (response.responseJSON.errors.product_name != undefined) {
-                    $('#error_name').css('visibility', 'visible');
+                    $('#error_product').css('visibility', 'visible');
                 }
 
-                if (response.responseJSON.errors.product_category != undefined) {
-                    $('#error_email').css('visibility', 'visible');
+                if (response.responseJSON.errors.product_qty != undefined) {
+                    $('#error_qty').css('visibility', 'visible');
                 }
 
-                if (response.responseJSON.errors.product_price != undefined) {
-                    $('#error_price').css('visibility', 'visible');
+                if (response.responseJSON.errors.product_status != undefined) {
+                    $('#error_status').css('visibility', 'visible');
                 }
 
                 Swal.fire({
@@ -328,8 +357,9 @@
                     icon: "error"
                 });
 
-                $("#error_name").html(response.responseJSON.errors.product_name);
-                $("#error_email").html(response.responseJSON.errors.product_category);
+                $("#error_product").html(response.responseJSON.errors.product_name);
+                $("#error_qty").html(response.responseJSON.errors.product_qty);
+                $("#error_status").html(response.responseJSON.errors.product_status);
 
 
             }

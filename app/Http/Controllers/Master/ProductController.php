@@ -108,6 +108,12 @@ class ProductController extends Controller
         ], 200);
     }
 
+    public function getAll()
+    {
+        $products = Product::all();
+        return response()->json(['data' => $products]);
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
