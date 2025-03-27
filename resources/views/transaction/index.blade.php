@@ -62,7 +62,7 @@
 
                             </div>
                             <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary add-customer">Simpan</button>
+                                <button type="submit" class="btn btn-primary add-product">Simpan</button>
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </form>
@@ -183,7 +183,7 @@
         saveData = 'add';
         $('#modal-transaksi').modal('show');
         formData[0].reset();
-        $(".modal-title").text("Setting Stock");
+        $(".modal-title").text("Tambah Transaksi");
         $(".add-customer").text("Setting");
     }
 
@@ -198,15 +198,15 @@
         $(".add-product").text("Update");
 
         $.ajax({
-            url: "{{ route('stocks.show', ':uuid') }}".replace(':uuid', uuid),
+            url: "{{ route('transactions.show', ':uuid') }}".replace(':uuid', uuid),
             method: 'get',
             dataType: "json",
             data: formData,
             success: function(response) {
 
-                getProduct(response.data.product_id);
-                getStatus(response.data.status);
-                $("#product_qty").val(response.data.qty);
+                getCustomer(response.data.customer_id);
+                $("#tanggal_pinjam").val(response.data.tanggal_pinjam);
+                $("#tanggal_kembali").val(response.data.tanggal_kembali);
             },
             error: function(response) {
 
@@ -237,7 +237,7 @@
             if (result.isConfirmed) {
 
                 if (saveData == 'delete') {
-                    url = "{{ route('stocks.destroy', ':uuid') }}";
+                    url = "{{ route('transactions.destroy', ':uuid') }}";
                     url = url.replace(':uuid', id);
                     method = 'DELETE';
                 }

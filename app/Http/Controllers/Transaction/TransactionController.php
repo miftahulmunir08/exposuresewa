@@ -116,7 +116,18 @@ class TransactionController extends Controller
 
     public function show(string $id)
     {
-        //
+        $transaction = Transaction::where(['id' => $id])->first();
+        if (!$transaction) {
+            return response()->json([
+                'message' => '404',
+                'error' => 'Transaction Log not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => '200',
+            'data' => $transaction,
+        ], 200);
     }
 
     /**
@@ -141,5 +152,11 @@ class TransactionController extends Controller
     public function destroy(string $id)
     {
         //
+        $transaction = Transaction::findOrFail($id);
+
+        // Delete the category
+        $transaction->delete();
+
+        return response()->json(['message' => 'Transaction deleted successfully']);
     }
 }
