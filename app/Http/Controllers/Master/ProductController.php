@@ -35,6 +35,11 @@ class ProductController extends Controller
                     $q->where('name', 'like', "%{$keyword}%");
                 });
             })
+            ->addColumn('harga', function ($product) {
+                return convertDivider($product->harga);
+            })
+
+
             ->addColumn('action', function ($product) {
                 return '
                 <a onclick="byid(`' . $product->uuid . '`)" href="#" class="btn btn-sm btn-primary">Edit</a>

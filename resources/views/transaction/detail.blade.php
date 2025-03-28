@@ -27,14 +27,14 @@
                 </div>
             </div>
         </div>
-        <div class="card-body">
+        <div class="card-body d-flex justify-content-center align-items-center">
             <form class="form-inline" id="add_cart_form">
                 <div class="form-group mb-2">
                     <label for="staticEmail2" class="sr-only">Product</label>
                     <select name="product_name" id="product-select2" class="product-select2 form-select form-control select2" style="width: 100%;">
                         <option value="" disabled selected>Select a product</option>
                     </select>
-                    <input type="hidden" name="transaction_code" id="transaction_code" value="{{ $transaction_code }}" />
+                    <input type="hidden" name="transaction_code" id="transaction_code" value="" />
                 </div>
                 <div class="form-group mx-sm-3 mb-2">
                     <label for="qty" class="sr-only">Qty</label>
@@ -54,36 +54,46 @@
                 </div>
             </div>
         </div>
-        <div class="card-body text-center">
+        <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered" id="table-transaction-cart" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>No</th>
                             <th>Product Name</th>
-                            <th>Price</th>
                             <th>Qty</th>
-                            <th>Total Price</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                 </table>
             </div>
 
-            <div class="d-flex justify-content-center align-items-center">
-                <div class="p-4 w-50">
-                    <form>
-                        <div class="d-flex">
-                            <select class="form-control w-50 mr-2">
-                                <option>Cash</option>
-                                <option>Transfer</option>
-                            </select>
-                            <button type="submit" class="btn btn-primary w-50">Proceed</button>
+            <div class="container">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="card-body">
+                            <form class="form-inline" id="add_cart_form">
+                                <div class="form-group m-2 w-100">
+                                    <select name="customer_name" id="customer-select2" class="customer-select2 form-select form-control select2" style="width: 100%;">
+                                        <option value="" disabled selected>Select a customer</option>
+                                    </select>
+                                    <input type="hidden" name="transaction_code" id="transaction_code" value="" />
+                                </div>
+                                <div class="form-group m-2">
+                                    <input name="start-date" type="date" class="datepicker form-control" placeholder="start date" min="{{ date('Y-m-d') }}" />
+                                </div>
+                                <div class="form-group m-2">
+                                    <input name="start-date" type="date" class="datepicker form-control" placeholder="end date" min="{{ date('Y-m-d') }}" />
+                                </div>
+                                <button type="submit" class="btn btn-primary m-2">Create Transaction</button>
+                            </form>
                         </div>
-                    </form>
+                    </div>
+                    <div class="col-6">
+                        <p>Total Harga</p>
+                    </div>
                 </div>
             </div>
-
 
             <div class="modal" id="modal-transaksi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
@@ -107,7 +117,7 @@
 
                                 <div class="form-group">
                                     <label for="qty">Qty</label>
-                                    <input type="hidden" name="transaction_code" id="transaction_code" value="{{ $transaction_code }}" />
+                                    <input type="hidden" name="transaction_code" id="transaction_code" value="" />
                                     <input name="qty" type="number" class="form-control" id="qty_product" aria-describedby="emailHelp" placeholder="Enter Qty">
                                     <small id="error_qty" class="form-text text-danger">We'll never share your email with anyone else.</small>
                                 </div>
@@ -151,6 +161,7 @@
     $(document).ready(function() {
         loadData();
         getProduct();
+        getCustomer();
         $('#error_product').css('visibility', 'hidden');
         $('#error_qty').css('visibility', 'hidden');
     });
@@ -181,16 +192,8 @@
                     name: 'product_id'
                 },
                 {
-                    data: 'price',
-                    name: 'price'
-                },
-                {
                     data: 'qty',
                     name: 'qty'
-                },
-                {
-                    data: 'total',
-                    name: 'total'
                 },
                 {
                     data: 'action',
@@ -219,7 +222,7 @@
                 });
 
                 $("#customer-select2").html(html).select2({
-                    placeholder: "Pilih Product",
+                    placeholder: "Pilih Customer",
                     allowClear: true,
                     width: "100%"
                 });

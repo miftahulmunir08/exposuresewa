@@ -16,4 +16,10 @@ class TransactionCart extends Model
     protected $keyType = 'string'; // Pastikan tipe data sesuai
     public $incrementing = false;
     protected $guarded = [];
+
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'uuid');
+    }
 }

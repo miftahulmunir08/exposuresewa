@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers as CT;
+use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Master\CategoryController;
 use App\Http\Controllers\Master\CustomerController;
 use App\Http\Controllers\Master\ProductController;
@@ -38,7 +39,7 @@ Route::group(['prefix' => 'stock', 'middleware' => 'auth'], function () {
 
 Route::group(['prefix' => 'transaction', 'middleware' => 'auth'], function () {
     Route::get('/', [TransactionController::class, 'index'])->name('transaction');
-    Route::get('/detail/{transaction_code}', [TransactionController::class, 'detail'])->name('transaction.detail');
+    Route::get('/detail', [TransactionController::class, 'detail'])->name('transaction.detail');
 });
 
 
@@ -52,6 +53,7 @@ Route::group(['prefix' => 'api', 'middleware' => 'auth:sanctum'], function () {
     Route::apiResource('transactions-cart', CT\Transaction\TransactionCartController::class);
 
 
+    Route::get('/dashboard/data', [DashboardController::class, 'getDashboardData'])->name('data.dashboard');
     Route::get('/customer/data', [CustomerController::class, 'getData'])->name('data.customer');
     Route::get('/category/data', [CategoryController::class, 'getData'])->name('data.category');
     Route::get('/product/data', [ProductController::class, 'getData'])->name('data.product');

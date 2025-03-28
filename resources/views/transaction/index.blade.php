@@ -8,8 +8,10 @@
         </div>
         <div class="card-body">
             <div class="float-right mb-4">
-                <button href="#" class="btn btn-primary text-end" onclick="add()"><i class="fa fa-plus"></i>
-                    Tambah Transaksi</button>
+                <!-- <button href="#" class="btn btn-primary text-end" onclick="add()"><i class="fa fa-plus"></i>
+                    Tambah Transaksi</button> -->
+                <a href="{{route('transaction.detail')}}" class="btn btn-primary text-end"><i class="fa fa-plus"></i>
+                    Tambah Transaksi</a>
             </div>
 
             <div class="table-responsive">
@@ -177,7 +179,7 @@
         });
     }
 
- 
+
 
     function add() {
         saveData = 'add';

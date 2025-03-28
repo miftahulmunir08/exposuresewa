@@ -28,7 +28,7 @@ class TransactionController extends Controller
 
     public function getData()
     {
-        $transaction = Transaction::select(['id', 'transaction_code', 'customer_id', 'tanggal_pinjam', 'tanggal_kembali', 'status']);
+        $transaction = Transaction::with(['customer'])->select(['id', 'transaction_code', 'customer_id', 'tanggal_pinjam', 'tanggal_kembali', 'status']);
 
 
         return DataTables::of($transaction)
@@ -39,7 +39,7 @@ class TransactionController extends Controller
                 $query->where('transaction_code', 'like', "%{$keyword}%");
             })
             ->addColumn('customer_id', function ($transaction) {
-                return $transaction->customer_id;
+                return $transaction->customer->name;
             })
             ->addColumn('tanggal_pinjam', function ($transaction) {
                 return $transaction->tanggal_pinjam;
@@ -106,10 +106,9 @@ class TransactionController extends Controller
      * Display the specified resource.
      */
 
-    public function detail($transaction_code)
+    public function detail()
     {
         $data['menu_active'] = 'transaksi';
-        $data['transaction_code'] = $transaction_code;
         return view('transaction/detail', $data);
     }
 

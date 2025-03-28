@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('uuid')->unique();
             $table->string('user_id')->index();
             $table->foreign('user_id')->references('uuid')->on('users');
-            $table->string('transaction_code');
+            $table->string('transaction_code')->nullable();
             $table->foreign('transaction_code')->references('transaction_code')->on('data_transaction');
             $table->char('product_id', 36)->index();
             $table->foreign('product_id')->references('uuid')->on('master_product');

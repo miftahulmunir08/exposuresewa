@@ -19,7 +19,7 @@
                             <th>No</th>
                             <th>Name</th>
                             <th>Category</th>
-                            <th>Harga</th>
+                            <th>Harga Sewa perhari</th>
                             <th>Action</th>
                         </tr>
                     </thead>

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
+use App\Models\Customer;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -67,5 +70,21 @@ class DashboardController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+
+    public function getDashboardData()
+    {
+        $product_count = Product::all()->count();
+        $category_count = Category::all()->count();
+        $customer_count = Customer::all()->count();
+
+        $data=[
+            "product"=>$product_count,
+            "category"=>$category_count,
+            "customer"=>$customer_count
+        ];
+
+        return response()->json(['data' => $data]);
     }
 }

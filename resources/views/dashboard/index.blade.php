@@ -19,7 +19,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Customer</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">1</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="customer">1</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-user fa-2x text-gray-300"></i>
@@ -37,10 +37,10 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Category</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">2</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="category">2</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
                             </div>
                             <div class="row no-gutters align-items-center">
                                 <div class="col-auto">
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">4</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="product">4</div>
                                 </div>
 
                             </div>
@@ -77,8 +77,59 @@
 
     </div>
 
-  
+
 
 </div>
+
+@endsection
+
+@section('js_script')
+<script>
+    var table;
+    var modal = $('#modal-category');
+    var formData = $('#customer_form');
+    var saveData;
+    var id_category;
+    var url, method;
+
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            'Authorization': 'Bearer ' + $('meta[name="api-token"]').attr('content')
+        }
+    });
+
+    $(document).ready(function() {
+        loadData();
+    });
+
+
+    function loadData() {
+        $.ajax({
+            url: "{{ route('data.dashboard') }}",
+            method: 'get',
+            dataType: "json",
+            data: formData,
+            success: function(response) {
+                console.log(response);
+                $("#product").text(response.data.product);
+                $("#category").text(response.data.category);
+                $("#customer").text(response.data.customer);
+            },
+            error: function(response) {
+
+                console.log(response);
+
+                Swal.fire({
+                    title: "Ambil" + " Data Gagal",
+                    icon: "error"
+                });
+
+            }
+        });
+
+    }
+</script>
 
 @endsection

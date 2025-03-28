@@ -30,7 +30,7 @@ class TransactionCartController extends Controller
 
     public function getData(Request $request)
     {
-        $cart = TransactionCart::select(['uuid', 'id', 'transaction_code', 'user_id', 'product_id', 'qty', 'price'])->where('transaction_code', 'like', '%' . $request->transaction_code . '%');
+        $cart = TransactionCart::with(["product"])->select(['uuid', 'id', 'transaction_code', 'user_id', 'product_id', 'qty', 'price'])->where('transaction_code', 'like', '%' . $request->transaction_code . '%');
 
         return DataTables::of($cart)
             ->addColumn('no', function () {
@@ -40,16 +40,17 @@ class TransactionCartController extends Controller
                 return $cart->user_id;
             })
             ->addColumn('product_id', function ($cart) {
-                return $cart->product_id;
+                return $cart->product->name;
             })
             ->addColumn('qty', function ($cart) {
                 return $cart->qty;
             })
             ->addColumn('price', function ($cart) {
-                return $cart->price;
+                return convertDivider($cart->price);
             })
             ->addColumn('total', function ($cart) {
-                return $cart->price * $cart->qty;
+                
+                return convertDivider($cart->price * $cart->qty);
             })
             ->addColumn('action', function ($cart) {
                 return '
