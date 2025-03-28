@@ -60,6 +60,8 @@ Route::group(['prefix' => 'api', 'middleware' => 'auth:sanctum'], function () {
     Route::get('/stock/data', [StockController::class, 'getData'])->name('data.stock');
     Route::get('/transaction/data', [TransactionController::class, 'getData'])->name('data.transaction');
     Route::get('/transaction-cart/data', [TransactionCartController::class, 'getData'])->name('data.transaction-cart');
+    Route::get('/transaction-cart/count', [TransactionCartController::class, 'getTotalCart'])->name('data.transaction-cart.count');
+    
 
 
     Route::get('/category/all', [CategoryController::class, 'getAll'])->name('data.category.all');

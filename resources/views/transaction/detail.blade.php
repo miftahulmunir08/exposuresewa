@@ -61,7 +61,9 @@
                         <tr>
                             <th>No</th>
                             <th>Product Name</th>
+                            <th>Per Hari</th>
                             <th>Qty</th>
+                            <th>Sub Total</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -80,17 +82,22 @@
                                     <input type="hidden" name="transaction_code" id="transaction_code" value="" />
                                 </div>
                                 <div class="form-group m-2">
-                                    <input name="start-date" type="date" class="datepicker form-control" placeholder="start date" min="{{ date('Y-m-d') }}" />
+                                    <input name="start-date" id="start-date" type="date" class="datepicker form-control" placeholder="start date" min="{{ date('Y-m-d') }}" />
                                 </div>
                                 <div class="form-group m-2">
-                                    <input name="start-date" type="date" class="datepicker form-control" placeholder="end date" min="{{ date('Y-m-d') }}" />
+                                    <input name="end-date" id="end-date" type="date" class="datepicker form-control" placeholder="end date" min="{{ date('Y-m-d') }}" />
+                                </div>
+                                <div class="form-group m-2">
+                                    <label for="total-days" class="mr-3">Total Days</label>
+                                    <input id="total-days" type="text" class="form-control" readonly />
                                 </div>
                                 <button type="submit" class="btn btn-primary m-2">Create Transaction</button>
                             </form>
                         </div>
                     </div>
                     <div class="col-6">
-                        <p>Total Harga</p>
+                        <p>Total Harga :</p>
+                        <h3 id="total_harga">25.000</h3>
                     </div>
                 </div>
             </div>
@@ -162,8 +169,37 @@
         loadData();
         getProduct();
         getCustomer();
+        getCountCart();
         $('#error_product').css('visibility', 'hidden');
         $('#error_qty').css('visibility', 'hidden');
+
+
+        function calculateDays() {
+            let startDate = new Date($("#start-date").val());
+            let endDate = new Date($("#end-date").val());
+
+            if (!isNaN(startDate) && !isNaN(endDate) && endDate >= startDate) {
+                let difference = (endDate - startDate) / (1000 * 60 * 60 * 24); // Konversi ms ke hari
+                $("#total-days").val(difference + " hari");
+
+                let url = "{{ route('data.transaction-cart.count')}}"; // Ambil semua kategori
+
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    success: function(response) {
+                        $("#total_harga").text("Rp. " + (response.data * difference).toLocaleString("id-ID"));
+                    },
+                    error: function(error) {
+                        console.error('Error fetching categories:', error);
+                    }
+                });
+            } else {
+                $("#total-days").val("");
+            }
+        }
+
+        $("#start-date, #end-date").on("change", calculateDays);
     });
 
     function loadData() {
@@ -177,9 +213,6 @@
             serverSide: true,
             ajax: {
                 url: "{{ route('data.transaction-cart') }}",
-                data: function(d) {
-                    d.transaction_code = $('#transaction_code').val(); // Ambil nilai dari input field
-                }
             },
             columns: [{
                     data: 'DT_RowIndex',
@@ -192,8 +225,16 @@
                     name: 'product_id'
                 },
                 {
+                    data: 'price',
+                    name: 'price'
+                },
+                {
                     data: 'qty',
                     name: 'qty'
+                },
+                {
+                    data: 'total',
+                    name: 'total'
                 },
                 {
                     data: 'action',
@@ -233,6 +274,20 @@
         });
     }
 
+    function getCountCart() {
+        let url = "{{ route('data.transaction-cart.count')}}"; // Ambil semua kategori
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(response) {
+                $("#total_harga").text("Rp. " + response.data.toLocaleString("id-ID"));
+            },
+            error: function(error) {
+                console.error('Error fetching categories:', error);
+            }
+        });
+    }
 
     $(formData).submit(function(e) {
         e.preventDefault();
@@ -253,6 +308,7 @@
                 // $('#modal-transaksi').hide();
                 // $('#modal-transaksi').modal('hide');
                 loadData();
+                getCountCart();
                 Swal.fire({
                     title: saveData + " Data Berhasil",
                     icon: "success"
@@ -311,6 +367,7 @@
                 // $('#modal-transaksi').hide();
                 // $('#modal-transaksi').modal('hide');
                 loadData();
+                getCountCart();
                 Swal.fire({
                     title: saveData + " Data Berhasil",
                     icon: "success"
@@ -412,6 +469,7 @@
                         $('#modal-stock').hide();
                         $('#modal-stock').modal('hide');
                         loadData();
+                        getCountCart();
                         Swal.fire({
                             title: saveData + " Data Berhasil",
                             icon: "success"
@@ -455,6 +513,7 @@
                 // $('#modal-transaksi').hide();
                 // $('#modal-transaksi').modal('hide');
                 loadData();
+                getCountCart();
                 Swal.fire({
                     title: saveData + " Data Berhasil",
                     icon: "success"
@@ -488,76 +547,6 @@
             }
         });
     });
-
-
-    // $(formData).submit(function(e) {
-    //     e.preventDefault();
-    //     const formData = new FormData(this);
-    //     if (saveData == 'add') {
-    //         method = 'POST';
-    //         url = "{{ route('transactions.store') }}";
-    //     } else if (saveData == 'edit') {
-    //         url = "{{ route('transactions.update', ':uuid') }}";
-    //         url = url.replace(':uuid', id_transaction);
-    //         method = 'PUT';
-    //     } else if (saveData == 'delete') {
-
-    //     }
-
-    //     if (saveData == 'edit') {
-    //         formData.append('_method', 'PUT');
-    //     } else if (saveData == 'delete') {
-    //         formData.append('_method', 'DELETE');
-    //     }
-
-    //     $.ajax({
-    //         url: url,
-    //         method: 'POST',
-    //         data: formData,
-    //         cache: false,
-    //         contentType: false,
-    //         processData: false,
-    //         dataType: 'json',
-    //         success: function(response) {
-    //             console.log(response);
-    //             $('#modal-transaksi').hide();
-    //             $('#modal-transaksi').modal('hide');
-    //             loadData();
-    //             Swal.fire({
-    //                 title: saveData + " Data Berhasil",
-    //                 icon: "success"
-    //             });
-    //         },
-    //         error: function(response) {
-
-    //             console.log(response);
-
-    //             if (response.responseJSON.errors.customer != undefined) {
-    //                 $('#error_customer').css('visibility', 'visible');
-    //             }
-
-    //             if (response.responseJSON.errors.tanggal_pinjam != undefined) {
-    //                 $('#error_tanggal_pinjam').css('visibility', 'visible');
-    //             }
-
-    //             if (response.responseJSON.errors.tanggal_kembali != undefined) {
-    //                 $('#error_tanggal_kembali').css('visibility', 'visible');
-    //             }
-
-    //             Swal.fire({
-    //                 title: saveData + " Data Gagal",
-    //                 icon: "error"
-    //             });
-
-    //             $("#error_product").html(response.responseJSON.errors.customer);
-    //             $("#error_tanggal_pinjam").html(response.responseJSON.errors.tanggal_pinjam);
-    //             $("#error_tanggal_kembali").html(response.responseJSON.errors.tanggal_kembali);
-
-
-    //         }
-    //     });
-
-    // });
 
     function getProduct(product_id = null) {
         let url = "{{ route('data.product.all')}}"; // Ambil semua kategori

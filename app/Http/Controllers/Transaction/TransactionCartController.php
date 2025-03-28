@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\TransactionCart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class TransactionCartController extends Controller
@@ -27,10 +28,9 @@ class TransactionCartController extends Controller
         //
     }
 
-
-    public function getData(Request $request)
+    public function getData()
     {
-        $cart = TransactionCart::with(["product"])->select(['uuid', 'id', 'transaction_code', 'user_id', 'product_id', 'qty', 'price'])->where('transaction_code', 'like', '%' . $request->transaction_code . '%');
+        $cart = TransactionCart::with(["product"])->select(['uuid', 'id', 'transaction_code', 'user_id', 'product_id', 'qty', 'price'])->where('transaction_code', NULL);
 
         return DataTables::of($cart)
             ->addColumn('no', function () {
@@ -49,7 +49,7 @@ class TransactionCartController extends Controller
                 return convertDivider($cart->price);
             })
             ->addColumn('total', function ($cart) {
-                
+
                 return convertDivider($cart->price * $cart->qty);
             })
             ->addColumn('action', function ($cart) {
@@ -62,13 +62,14 @@ class TransactionCartController extends Controller
             ->addIndexColumn()
             ->make(true);
     }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'transaction_code' => 'required',
+            'product_name' => 'required',
             'qty' => 'required',
         ]);
 
@@ -130,7 +131,7 @@ class TransactionCartController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'transaction_code' => 'required',
+            'product_name' => 'required',
             'qty' => 'required',
         ]);
 
@@ -172,5 +173,16 @@ class TransactionCartController extends Controller
         $transaction_cart->delete();
 
         return response()->json(['message' => 'Transaction Cart deleted successfully']);
+    }
+
+    public function getTotalCart()
+    {
+        $total = TransactionCart::whereNull('transaction_code')
+            ->sum(DB::raw('qty * price'));
+
+        return response()->json([
+            'message' => '200',
+            'data' => $total,
+        ], 200);
     }
 }
