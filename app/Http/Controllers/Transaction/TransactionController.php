@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Transaction;
 
 use App\Http\Controllers\Controller;
+use App\Models\StockLog;
 use App\Models\Transaction;
+use App\Models\TransactionCart;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class TransactionController extends Controller
@@ -60,8 +63,7 @@ class TransactionController extends Controller
             })
             ->addColumn('action', function ($transaction) {
                 return '
-                <a href="' . route('transaction.detail', $transaction->transaction_code) . '" class="btn btn-sm btn-primary mt-1">Cart</a>
-                <a onclick="byid(`' . $transaction->id . '`)" href="#" class="btn btn-sm btn-primary mt-1">Edit</a>
+                <a onclick="byid(`' . $transaction->id . '`)" href="#" class="btn btn-sm btn-primary mt-1">Detail</a>
                 <a onclick="destroy(`' . $transaction->id . '`)" href="#" class="btn btn-sm btn-danger mt-1">Delete</a>
                 ';
             })
@@ -77,29 +79,55 @@ class TransactionController extends Controller
     {
         $request->validate([
             'customer' => 'required',
-            'tanggal_pinjam' => 'required',
-            'tanggal_kembali' => 'required',
+            'start_date' => 'required',
+            'end_date' => 'required',
         ]);
 
-        $data['transaction_code']      = Transaction::generateTransactionCode();
+        $data['transaction_code'] = Transaction::generateTransactionCode();
         $data['customer_id'] = $request->customer;
-        $data['tanggal_pinjam'] = $request->tanggal_pinjam;
-        $data['tanggal_kembali'] = $request->tanggal_kembali;
-        $data['status'] = 'unfinish'; // Auto-generate
+        $data['tanggal_pinjam'] = $request->start_date;
+        $data['tanggal_kembali'] = $request->end_date;
+        $data['status'] = 'dipinjam'; // Auto-generate
 
-        $transaction = Transaction::create($data);
+        DB::beginTransaction();
 
-        if (!$transaction) {
+        try {
+            // Simpan transaksi baru
+            $transaction = Transaction::create($data);
+
+            // Update transaction_code di TransactionCart berdasarkan kode transaksi baru
+            $carts = TransactionCart::whereNull('transaction_code')->get();
+            TransactionCart::whereNull('transaction_code')
+                ->update(['transaction_code' => $data['transaction_code']]);
+
+            foreach ($carts as $cart) {
+                StockLog::create([
+                    'transaction_code' => $data['transaction_code'],
+                    'product_id' => $cart->product_id,
+                    'qty' => $cart->qty,
+                    'status' => 'dipinjam' // Status otomatis 'dipinjam'
+                ]);
+            }
+
+            $cart = TransactionCart::with(["product"])->select(['uuid', 'id', 'transaction_code', 'user_id', 'product_id', 'qty', 'price'])->where('transaction_code', NULL);
+            // Commit transaksi jika semua berhasil
+            DB::commit();
+
             return response()->json([
-                'message' => '404',
-                'error' => 'Create Transaction Failed',
-            ], 404);
-        }
+                'success' => true,
+                'message' => 'Transaksi berhasil!',
+                'transaction' => $transaction
+            ]);
+        } catch (\Exception $e) {
+            // Rollback jika terjadi error
+            DB::rollBack();
 
-        return response()->json([
-            'message' => '200',
-            'data' => $transaction,
-        ], 200);
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi gagal!',
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
