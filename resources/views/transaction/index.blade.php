@@ -10,7 +10,7 @@
             <div class="float-right mb-4">
                 <!-- <button href="#" class="btn btn-primary text-end" onclick="add()"><i class="fa fa-plus"></i>
                     Tambah Transaksi</button> -->
-                <a href="{{route('transaction.detail')}}" class="btn btn-primary text-end"><i class="fa fa-plus"></i>
+                <a href="{{route('transaction.create')}}" class="btn btn-primary text-end"><i class="fa fa-plus"></i>
                     Tambah Transaksi</a>
             </div>
 

@@ -26,7 +26,8 @@ class TransactionController extends Controller
      */
     public function create()
     {
-        //
+        $data['menu_active'] = 'transaksi';
+        return view('transaction/create', $data);
     }
 
     public function getData()
@@ -68,7 +69,7 @@ class TransactionController extends Controller
                     $buttons .= '<a onclick="byid(`' . $transaction->id . '`)" href="#" class="btn btn-sm btn-warning mt-1 mr-1">Dikembalikan</a>';
                 }
 
-                $buttons .= '<a onclick="byid(`' . $transaction->id . '`)" href="#" class="btn btn-sm btn-primary mt-1">Detail</a>';
+                $buttons .= '<a href="' . route('transaction.detail', $transaction->transaction_code) . '" class="btn btn-sm btn-info mt-1">Detail</a>';
                 $buttons .= '<a onclick="destroy(`' . $transaction->id . '`)" href="#" class="btn btn-sm btn-danger mt-1">Delete</a>';
 
                 return $buttons;
@@ -77,6 +78,8 @@ class TransactionController extends Controller
             ->addIndexColumn()
             ->make(true);
     }
+
+   
 
     /**
      * Store a newly created resource in storage.
@@ -140,9 +143,10 @@ class TransactionController extends Controller
      * Display the specified resource.
      */
 
-    public function detail()
+    public function detail($transaction_code)
     {
         $data['menu_active'] = 'transaksi';
+        $data['transaction_code'] = $transaction_code;
         return view('transaction/detail', $data);
     }
 

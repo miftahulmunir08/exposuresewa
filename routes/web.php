@@ -39,7 +39,8 @@ Route::group(['prefix' => 'stock', 'middleware' => 'auth'], function () {
 
 Route::group(['prefix' => 'transaction', 'middleware' => 'auth'], function () {
     Route::get('/', [TransactionController::class, 'index'])->name('transaction');
-    Route::get('/detail', [TransactionController::class, 'detail'])->name('transaction.detail');
+    Route::get('/detail/{transaction_code}', [TransactionController::class, 'detail'])->name('transaction.detail');
+    Route::get('/create', [TransactionController::class, 'create'])->name('transaction.create');
 });
 
 
@@ -60,9 +61,12 @@ Route::group(['prefix' => 'api', 'middleware' => 'auth:sanctum'], function () {
     Route::get('/stock/data', [StockController::class, 'getData'])->name('data.stock');
     Route::get('/transaction/data', [TransactionController::class, 'getData'])->name('data.transaction');
     Route::get('/transaction-cart/data', [TransactionCartController::class, 'getData'])->name('data.transaction-cart');
+    Route::get('/transaction-cart/detail-data', [TransactionCartController::class, 'getDataDetail'])->name('data.transaction-cart-detail');
     Route::get('/transaction-cart/count', [TransactionCartController::class, 'getTotalCart'])->name('data.transaction-cart.count');
-    
+    Route::get('/transaction-cart/count-detail/{transaction_code}', [TransactionCartController::class, 'getTotalCartDetail'])->name('data.transaction-cart.count-detail');
 
+
+    // 
 
     Route::get('/category/all', [CategoryController::class, 'getAll'])->name('data.category.all');
     Route::get('/product/all', [ProductController::class, 'getAll'])->name('data.product.all');

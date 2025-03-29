@@ -34,7 +34,7 @@
                     <select name="product_name" id="product-select2" class="product-select2 form-select form-control select2" style="width: 100%;">
                         <option value="" disabled selected>Select a product</option>
                     </select>
-                    <input type="hidden" name="transaction_code" id="transaction_code" value="{{ $transaction_code }}" />
+                    <input type="hidden" name="transaction_code" id="transaction_code" value="" />
                 </div>
                 <div class="form-group mx-sm-3 mb-2">
                     <label for="qty" class="sr-only">Qty</label>
@@ -79,7 +79,7 @@
                                     <select name="customer" id="customer-select2" class="customer-select2 form-select form-control select2" style="width: 100%;">
                                         <option value="" disabled selected>Select a customer</option>
                                     </select>
-                                    <input type="hidden" name="transaction_code" id="transaction_code" value="{{ $transaction_code }}" />
+                                    <input type="hidden" name="transaction_code" id="transaction_code" value="" />
                                 </div>
                                 <div class="form-group m-2">
                                     <input name="start_date" id="start-date" type="date" class="datepicker form-control" placeholder="start date" min="{{ date('Y-m-d') }}" />
@@ -91,7 +91,7 @@
                                     <label for="total-days" class="mr-3">Total Days</label>
                                     <input id="total-days" type="text" class="form-control" readonly />
                                 </div>
-                                <button type="submit" class="btn btn-info m-2">Update Transaction</button>
+                                <button type="submit" class="btn btn-primary m-2">Create Transaction</button>
                             </form>
                         </div>
                     </div>
@@ -124,7 +124,7 @@
 
                                 <div class="form-group">
                                     <label for="qty">Qty</label>
-                                    <input type="hidden" name="transaction_code" id="transaction_code" value="{{ $transaction_code }}" />
+                                    <input type="hidden" name="transaction_code" id="transaction_code" value="" />
                                     <input name="qty" type="number" class="form-control" id="qty_product" aria-describedby="emailHelp" placeholder="Enter Qty">
                                     <small id="error_qty" class="form-text text-danger">We'll never share your email with anyone else.</small>
                                 </div>
@@ -184,8 +184,7 @@
                 let difference = (endDate - startDate) / (1000 * 60 * 60 * 24); // Konversi ms ke hari
                 $("#total-days").val(difference + " hari");
 
-                let transactionCode = '{{ $transaction_code }}'; // Gantilah dengan variabel yang sesuai
-                let url = "{{ route('data.transaction-cart.count-detail', ':transaction_code') }}".replace(':transaction_code', transactionCode);
+                let url = "{{ route('data.transaction-cart.count')}}"; // Ambil semua kategori
 
                 $.ajax({
                     url: url,
@@ -215,10 +214,7 @@
             ordering: true,
             serverSide: true,
             ajax: {
-                url: "{{ route('data.transaction-cart-detail') }}",
-                data: function(d) {
-                    d.transaction_code = $('#transaction_code').val(); // Ambil nilai dari input field
-                }
+                url: "{{ route('data.transaction-cart') }}",
             },
             columns: [{
                     data: 'DT_RowIndex',
@@ -281,8 +277,7 @@
     }
 
     function getCountCart() {
-        let transactionCode = '{{ $transaction_code }}'; // Gantilah dengan variabel yang sesuai
-        let url = "{{ route('data.transaction-cart.count-detail', ':transaction_code') }}".replace(':transaction_code', transactionCode);
+        let url = "{{ route('data.transaction-cart.count')}}"; // Ambil semua kategori
 
         $.ajax({
             url: url,

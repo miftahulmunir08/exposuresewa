@@ -63,6 +63,41 @@ class TransactionCartController extends Controller
             ->make(true);
     }
 
+    public function getDataDetail(Request $request)
+    {
+        $cart = TransactionCart::select(['uuid','id', 'transaction_code', 'user_id', 'product_id', 'qty', 'price'])->where('transaction_code', 'like', '%' . $request->transaction_code . '%');
+
+        return DataTables::of($cart)
+            ->addColumn('no', function () {
+                return 'DT_RowIndex';
+            })
+            ->addColumn('user_id', function ($cart) {
+                return $cart->user_id;
+            })
+            ->addColumn('product_id', function ($cart) {
+                return $cart->product->name;
+            })
+            ->addColumn('qty', function ($cart) {
+                return $cart->qty;
+            })
+            ->addColumn('price', function ($cart) {
+                return convertDivider($cart->price);
+            })
+
+            ->addColumn('total', function ($cart) {
+                return  convertDivider($cart->price * $cart->qty);
+            })
+            ->addColumn('action', function ($cart) {
+                return '
+                <a onclick="byid(`' . $cart->uuid . '`)" href="#" class="btn btn-sm btn-primary mt-1">Edit</a>
+                <a onclick="destroy(`' . $cart->uuid . '`)" href="#" class="btn btn-sm btn-danger mt-1">Delete</a>
+                ';
+            })
+            ->rawColumns(['action']) // Jika ada kolom HTML
+            ->addIndexColumn()
+            ->make(true);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -178,6 +213,17 @@ class TransactionCartController extends Controller
     public function getTotalCart()
     {
         $total = TransactionCart::whereNull('transaction_code')
+            ->sum(DB::raw('qty * price'));
+
+        return response()->json([
+            'message' => '200',
+            'data' => $total,
+        ], 200);
+    }
+
+    public function getTotalCartDetail($transaction_code)
+    {
+        $total = TransactionCart::where('transaction_code', $transaction_code)
             ->sum(DB::raw('qty * price'));
 
         return response()->json([
