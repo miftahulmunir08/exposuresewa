@@ -72,20 +72,20 @@
 
             <div class="container">
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-12 col-lg-6">
                         <div class="card-body">
-                            <form class="form-inline" id="add_cart_form">
+                            <form class="form-inline" id="add_transaction">
                                 <div class="form-group m-2 w-100">
-                                    <select name="customer_name" id="customer-select2" class="customer-select2 form-select form-control select2" style="width: 100%;">
+                                    <select name="customer" id="customer-select2" class="customer-select2 form-select form-control select2" style="width: 100%;">
                                         <option value="" disabled selected>Select a customer</option>
                                     </select>
                                     <input type="hidden" name="transaction_code" id="transaction_code" value="" />
                                 </div>
                                 <div class="form-group m-2">
-                                    <input name="start-date" id="start-date" type="date" class="datepicker form-control" placeholder="start date" min="{{ date('Y-m-d') }}" />
+                                    <input name="start_date" id="start-date" type="date" class="datepicker form-control" placeholder="start date" min="{{ date('Y-m-d') }}" />
                                 </div>
                                 <div class="form-group m-2">
-                                    <input name="end-date" id="end-date" type="date" class="datepicker form-control" placeholder="end date" min="{{ date('Y-m-d') }}" />
+                                    <input name="end_date" id="end-date" type="date" class="datepicker form-control" placeholder="end date" min="{{ date('Y-m-d') }}" />
                                 </div>
                                 <div class="form-group m-2">
                                     <label for="total-days" class="mr-3">Total Days</label>
@@ -95,7 +95,7 @@
                             </form>
                         </div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-12 col-lg-6">
                         <p>Total Harga :</p>
                         <h3 id="total_harga">25.000</h3>
                     </div>
@@ -153,6 +153,8 @@
     var modal = $('#modal-stock');
     var formData = $('#add_cart_form');
     var formData2 = $('#transaction_cart_form');
+    var formData3 = $('#add_transaction');
+
     var saveData;
     var id_category;
     var url, method;
@@ -575,5 +577,59 @@
             }
         });
     }
+
+    $(formData3).submit(function(e) {
+        e.preventDefault();
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, Sure!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                let formData = new FormData(this);
+                formData.append('_method', 'POST'); // Tambahkan metode jika perlu
+                let url = "{{ route('transactions.store') }}"; // Rute API
+
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    success: function(response) {
+                        // alert("sudah");
+                        // return;
+                        // console.log(response);
+                        $('#modal-stock').hide();
+                        $('#modal-stock').modal('hide');
+                        Swal.fire({
+                            title: " Transaksi Berhasil Dibuat",
+                            icon: "success"
+                        });
+                        window.location.href = "transaction/"; // Ganti dengan URL tujuan
+                    },
+                    error: function(response) {
+
+                        // console.log(response);
+                        // alert("ss");
+                        // return;
+
+                        Swal.fire({
+                            title: saveData + " Data Gagal",
+                            icon: "error"
+                        });
+
+                    }
+                });
+            }
+        });
+    });
 </script>
 @endsection
