@@ -613,7 +613,7 @@
                             title: " Transaksi Berhasil Dibuat",
                             icon: "success"
                         });
-                        window.location.href = "transaction/"; // Ganti dengan URL tujuan
+                        window.location.href = "/transaction"; // Ganti dengan URL tujuan
                     },
                     error: function(response) {
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Stock;
 use App\Http\Controllers\Controller;
 use App\Models\StockLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class StockController extends Controller
@@ -58,6 +59,22 @@ class StockController extends Controller
             ->make(true);
     }
 
+
+    public function getStock()
+    {
+        $stok = DB::table('data_product_stock_log')
+            ->select('product_id', DB::raw("
+        SUM(CASE 
+            WHEN status IN ('baru', 'dikembalikan') THEN qty 
+            WHEN status IN ('dipinjam', 'hilang', 'rusak') THEN -qty 
+            ELSE 0 
+        END) AS total_stok
+    "))
+            ->groupBy('product_id')
+            ->get();
+
+            
+    }
 
     /**
      * Show the form for creating a new resource.

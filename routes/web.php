@@ -53,7 +53,6 @@ Route::group(['prefix' => 'api', 'middleware' => 'auth:sanctum'], function () {
     Route::apiResource('transactions', CT\Transaction\TransactionController::class);
     Route::apiResource('transactions-cart', CT\Transaction\TransactionCartController::class);
 
-
     Route::get('/dashboard/data', [DashboardController::class, 'getDashboardData'])->name('data.dashboard');
     Route::get('/customer/data', [CustomerController::class, 'getData'])->name('data.customer');
     Route::get('/category/data', [CategoryController::class, 'getData'])->name('data.category');
@@ -64,9 +63,6 @@ Route::group(['prefix' => 'api', 'middleware' => 'auth:sanctum'], function () {
     Route::get('/transaction-cart/detail-data', [TransactionCartController::class, 'getDataDetail'])->name('data.transaction-cart-detail');
     Route::get('/transaction-cart/count', [TransactionCartController::class, 'getTotalCart'])->name('data.transaction-cart.count');
     Route::get('/transaction-cart/count-detail/{transaction_code}', [TransactionCartController::class, 'getTotalCartDetail'])->name('data.transaction-cart.count-detail');
-
-
-    // 
 
     Route::get('/category/all', [CategoryController::class, 'getAll'])->name('data.category.all');
     Route::get('/product/all', [ProductController::class, 'getAll'])->name('data.product.all');

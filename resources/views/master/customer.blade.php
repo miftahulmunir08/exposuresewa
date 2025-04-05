@@ -151,7 +151,7 @@
     }
 
     function byid(id) {
-        alert(id);
+        // alert(id);
 
         var uuid = id;
         id_customer = id;

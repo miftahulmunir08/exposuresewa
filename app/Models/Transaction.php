@@ -12,7 +12,9 @@ class Transaction extends Model
     use HasFactory, HasApiTokens, SoftDeletes;
 
     protected $table = 'data_transaction';  // Make sure this matches your table name
-
+    protected $primaryKey = 'transaction_code';
+    protected $keyType = 'string'; // Pastikan tipe data sesuai
+    public $incrementing = false;
     protected $guarded = [];
 
     public static function generateTransactionCode()

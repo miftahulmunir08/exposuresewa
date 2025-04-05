@@ -32,7 +32,7 @@ class TransactionController extends Controller
 
     public function getData()
     {
-        $transaction = Transaction::with(['customer'])->select(['id', 'transaction_code', 'customer_id', 'tanggal_pinjam', 'tanggal_kembali', 'status']);
+        $transaction = Transaction::with(['customer'])->select(['id', 'transaction_code', 'customer_id', 'tanggal_pinjam', 'tanggal_kembali', 'tanggal_pengembalian', 'status']);
 
 
         return DataTables::of($transaction)
@@ -50,6 +50,9 @@ class TransactionController extends Controller
             })
             ->addColumn('tanggal_kembali', function ($transaction) {
                 return $transaction->tanggal_kembali;
+            })
+            ->addColumn('tanggal_pengembalian', function ($transaction) {
+                return $transaction->tanggal_pengembalian;
             })
             ->addColumn('status', function ($row) {
                 $status = strtolower($row->status); // Pastikan lowercase untuk pencocokan warna
@@ -70,7 +73,7 @@ class TransactionController extends Controller
                 }
 
                 $buttons .= '<a href="' . route('transaction.detail', $transaction->transaction_code) . '" class="btn btn-sm btn-info mt-1">Detail</a>';
-                $buttons .= '<a onclick="destroy(`' . $transaction->id . '`)" href="#" class="btn btn-sm btn-danger mt-1">Delete</a>';
+                $buttons .= '<a onclick="destroy(`' . $transaction->transaction_code . '`)" href="#" class="btn btn-sm btn-danger mt-1">Delete</a>';
 
                 return $buttons;
             })
@@ -79,7 +82,7 @@ class TransactionController extends Controller
             ->make(true);
     }
 
-   
+
 
     /**
      * Store a newly created resource in storage.
@@ -180,7 +183,63 @@ class TransactionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $transaction_code = $request->transaction_code;
+
+        $request->validate([
+            'transaction_code' => 'required',
+            'tanggal_pengembalian' => 'required',
+            'denda_bayar_2' => 'required',
+        ]);
+
+
+        DB::beginTransaction();
+
+        try {
+
+            // Find category or return 404
+            $transaction = Transaction::findOrFail($transaction_code);
+
+            $data['tanggal_pengembalian'] = $request->tanggal_pengembalian;
+            $data['biaya_denda'] = $request->denda_bayar_2;
+            $data['is_late'] = $request->denda_bayar_2 > 0 ? true : false;
+            $data['status'] = 'dikembalikan';
+
+            // Update the category
+            $transaction->update($data);
+
+            $carts = TransactionCart::where('transaction_code', $transaction_code)->get();
+
+            foreach ($carts as $cart) {
+                StockLog::create([
+                    'transaction_code' => $transaction_code,
+                    'product_id' => $cart->product_id,
+                    'qty' => $cart->qty,
+                    'status' => 'dikembalikan'
+                ]);
+            }
+
+            if (!$transaction) {
+                return response()->json([
+                    'message' => '404',
+                    'error' => 'Update Transaction Failed',
+                ], 404);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => '200',
+                'data' => $transaction,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi gagal!',
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -195,5 +254,9 @@ class TransactionController extends Controller
         $transaction->delete();
 
         return response()->json(['message' => 'Transaction deleted successfully']);
+    }
+
+    public function getTransactionByCode($transaction_code)
+    {
     }
 }

@@ -23,6 +23,7 @@
                             <th>Customer</th>
                             <th>Tanggal Peminjaman</th>
                             <th>Tanggal Kembali</th>
+                            <th>Tanggal Pengembalian</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -41,26 +42,46 @@
                         </div>
                         <form id="stock_form">
                             <div class="modal-body">
-
-                                <div class="form-group">
+                                <div class="mb-0">
                                     <label for="customer">Customer</label>
-                                    <select name="customer" id="customer-select2" class="form-select select2" style="width: 100%;">
+                                    <select name="customer" id="customer-select2" class="form-select select2" style="width: 100%;" disabled>
                                         <option value="" disabled selected>Select a category</option>
                                     </select>
+                                    <input name="transaction_code" id="transaction_code" />
                                     <small id="error_customer" class="form-text text-danger">We'll never share your email with anyone else.</small>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="mb-0">
                                     <label for="tanggal_pinjam">Tanggal Peminjaman</label>
-                                    <input name="tanggal_pinjam" type="date" class="form-control" id="tanggal_pinjam" aria-describedby="emailHelp" placeholder="Enter Tanggal Pinjam">
+                                    <input name="tanggal_pinjam" type="text" class="form-control" id="tanggal_pinjam" aria-describedby="emailHelp" placeholder="Enter Tanggal Pinjam" disabled>
                                     <small id="error_tanggal_pinjam" class="form-text text-danger">We'll never share your email with anyone else.</small>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="mb-0">
                                     <label for="tanggal_kembali">Tanggal Kembali</label>
-                                    <input name="tanggal_kembali" type="date" class="form-control" id="tanggal_kembali" aria-describedby="emailHelp" placeholder="Enter Tanggal Pinjam">
+                                    <input name="tanggal_kembali" type="text" class="form-control" id="tanggal_kembali" aria-describedby="emailHelp" placeholder="Enter Tanggal Pinjam" disabled>
                                     <small id="error_tanggal_kembali" class="form-text text-danger">We'll never share your email with anyone else.</small>
                                 </div>
+
+                                <div class="mb-0">
+                                    <label for="tanggal_pengembalian">Tanggal Pengembalian</label>
+                                    <input name="tanggal_pengembalian" type="date" class="form-control" id="tanggal_pengembalian" aria-describedby="emailHelp" placeholder="Enter Tanggal Pengembalian">
+                                    <small id="error_tanggal_pengembalian" class="form-text text-danger">We'll never share your email with anyone else.</small>
+                                </div>
+
+                                <div class="mb-0">
+                                    <label for="telat">Telat</label>
+                                    <input name="telat" type="text" class="form-control" id="telat" aria-describedby="emailHelp" placeholder="Telat" disabled>
+                                </div>
+
+                                <div class="mb-0">
+                                    <label for="denda_bayar">Denda&nbsp;Bayar</label>
+                                    <input name="denda_bayar" type="text" class="form-control" id="denda_bayar" aria-describedby="emailHelp" placeholder="Denda" disabled>
+                                    <input name="denda_bayar_2" type="hidden" class="form-control" id="denda_bayar_2" aria-describedby="emailHelp" placeholder="Denda">
+                                </div>
+
+                                <!-- <p>Total Harga :</p>
+                                <h3 id="total_harga">25.000</h3> -->
 
                             </div>
                             <div class="modal-footer">
@@ -86,7 +107,9 @@
     var formData = $('#stock_form');
     var saveData;
     var id_category;
+    var transaction_code;
     var url, method;
+    var selisihHari = 0;
 
 
     $.ajaxSetup({
@@ -102,6 +125,7 @@
         $('#error_customer').css('visibility', 'hidden');
         $('#error_tanggal_pinjam').css('visibility', 'hidden');
         $('#error_tanggal_kembali').css('visibility', 'hidden');
+
     });
 
     function loadData() {
@@ -136,6 +160,10 @@
                 {
                     data: 'tanggal_kembali',
                     name: 'tanggal_kembali'
+                },
+                {
+                    data: 'tanggal_pengembalian',
+                    name: 'tanggal_pengembalian'
                 },
                 {
                     data: 'status',
@@ -179,7 +207,57 @@
         });
     }
 
+    function getCountCart(transaction_code, telat) {
+        let transactionCode = transaction_code; // Gantilah dengan variabel yang sesuai
+        let url = "{{ route('data.transaction-cart.count-detail', ':transaction_code') }}".replace(':transaction_code', transactionCode);
 
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(response) {
+                $("#total_harga").text("Rp. " + (response.data * telat).toLocaleString("id-ID"));
+                $("#telat").val(selisihHari);
+                $("#denda_bayar").val((response.data * 0.1) * selisihHari);
+                $("#denda_bayar_2").val((response.data * 0.1) * selisihHari);
+            },
+            error: function(error) {
+                console.error('Error fetching categories:', error);
+            }
+        });
+    }
+
+    function calculateDays() {
+
+        let startDate = new Date($("#tanggal_pinjam").val());
+        let endDate = new Date($("#tanggal_kembali").val());
+        let pengembalianDate = new Date($("#tanggal_pengembalian").val());
+
+        // alert(startDate);
+        // return;
+
+        if (!isNaN(startDate) && !isNaN(endDate) && endDate >= startDate) {
+            let difference = (pengembalianDate - endDate) / (1000 * 60 * 60 * 24); // Konversi ms ke hari
+            $("#total-days").val(difference + " hari");
+            selisihHari = difference;
+
+            // return difference;
+            // alert(difference);
+
+            // let transactionCode = transaction_code; // Gantilah dengan variabel yang sesuai
+            // let url = "{{ route('data.transaction-cart.count-detail', ':transaction_code') }}".replace(':transaction_code', transactionCode);
+
+            // $.ajax({
+            //     url: url,
+            //     method: 'GET',
+            //     success: function(response) {
+            //         $("#total_harga").text("Rp. " + (response.data * difference).toLocaleString("id-ID"));
+            //     },
+            //     error: function(error) {
+            //         console.error('Error fetching categories:', error);
+            //     }
+            // });
+        }
+    }
 
     function add() {
         saveData = 'add';
@@ -197,7 +275,7 @@
 
         $('#modal-transaksi').modal('show');
         $(".modal-title").text("Update Stock");
-        $(".add-product").text("Update");
+        $(".add-product").text("Pengembalian");
 
         $.ajax({
             url: "{{ route('transactions.show', ':uuid') }}".replace(':uuid', uuid),
@@ -209,6 +287,13 @@
                 getCustomer(response.data.customer_id);
                 $("#tanggal_pinjam").val(response.data.tanggal_pinjam);
                 $("#tanggal_kembali").val(response.data.tanggal_kembali);
+                $("#transaction_code").val(response.data.transaction_code);
+                transaction_code = response.data.transaction_code;
+                $("#tanggal_pengembalian").on("change", function(e) {
+                    calculateDays();
+                    getCountCart(response.data.transaction_code, selisihHari);
+                    // alert(selisihHari);
+                });
             },
             error: function(response) {
 
@@ -282,70 +367,67 @@
 
     $(formData).submit(function(e) {
         e.preventDefault();
-        const formData = new FormData(this);
-        if (saveData == 'add') {
-            method = 'POST';
-            url = "{{ route('transactions.store') }}";
-        } else if (saveData == 'edit') {
-            url = "{{ route('transactions.update', ':uuid') }}";
-            url = url.replace(':uuid', id_transaction);
-            method = 'PUT';
-        } else if (saveData == 'delete') {
+        Swal.fire({
+            title: "Sebelum Pengembalian Harap Cek Detail Barang Apa Saja Yang Dipinjam",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, confirm!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData(this);
+                if (saveData == 'add') {
+                    method = 'POST';
+                    url = "{{ route('transactions.store') }}";
+                } else if (saveData == 'edit') {
+                    url = "{{ route('transactions.update', ':uuid') }}";
+                    url = url.replace(':uuid', id_transaction);
+                    method = 'PUT';
+                }
 
-        }
+                if (saveData == 'edit') {
+                    formData.append('_method', 'PUT');
+                } else if (saveData == 'delete') {
+                    formData.append('_method', 'DELETE');
+                }
 
-        if (saveData == 'edit') {
-            formData.append('_method', 'PUT');
-        } else if (saveData == 'delete') {
-            formData.append('_method', 'DELETE');
-        }
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    success: function(response) {
+                        // console.log(response);
+                        // $('#modal-transaksi').hide();
+                        // $('#modal-transaksi').modal('hide');
+                        loadData();
+                        Swal.fire({
+                            title: "Update" + " Data Berhasil",
+                            icon: "success"
+                        });
+                    },
+                    error: function(response) {
 
-        $.ajax({
-            url: url,
-            method: 'POST',
-            data: formData,
-            cache: false,
-            contentType: false,
-            processData: false,
-            dataType: 'json',
-            success: function(response) {
-                console.log(response);
-                $('#modal-transaksi').hide();
-                $('#modal-transaksi').modal('hide');
-                loadData();
-                Swal.fire({
-                    title: saveData + " Data Berhasil",
-                    icon: "success"
+                        console.log(response);
+
+                        Swal.fire({
+                            title: saveData + " Data Gagal",
+                            icon: "error"
+                        });
+
+                        // $("#error_product").html(response.responseJSON.errors.customer);
+                        // $("#error_tanggal_pinjam").html(response.responseJSON.errors.tanggal_pinjam);
+                        // $("#error_tanggal_kembali").html(response.responseJSON.errors.tanggal_kembali);
+                    }
                 });
-            },
-            error: function(response) {
-
-                console.log(response);
-
-                if (response.responseJSON.errors.customer != undefined) {
-                    $('#error_customer').css('visibility', 'visible');
-                }
-
-                if (response.responseJSON.errors.tanggal_pinjam != undefined) {
-                    $('#error_tanggal_pinjam').css('visibility', 'visible');
-                }
-
-                if (response.responseJSON.errors.tanggal_kembali != undefined) {
-                    $('#error_tanggal_kembali').css('visibility', 'visible');
-                }
-
-                Swal.fire({
-                    title: saveData + " Data Gagal",
-                    icon: "error"
-                });
-
-                $("#error_product").html(response.responseJSON.errors.customer);
-                $("#error_tanggal_pinjam").html(response.responseJSON.errors.tanggal_pinjam);
-                $("#error_tanggal_kembali").html(response.responseJSON.errors.tanggal_kembali);
-
-
             }
         });
+        // return;
 
     });
 </script>

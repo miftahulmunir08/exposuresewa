@@ -154,6 +154,7 @@
     var formData = $('#add_cart_form');
     var formData2 = $('#transaction_cart_form');
     var formData3 = $('#add_transaction');
+    var transaction_code = '{{ $transaction_code }}';
 
     var saveData;
     var id_category;
@@ -172,6 +173,7 @@
         getProduct();
         getCustomer();
         getCountCart();
+        get_transaction(transaction_code);
         $('#error_product').css('visibility', 'hidden');
         $('#error_qty').css('visibility', 'hidden');
 
@@ -636,5 +638,10 @@
             }
         });
     });
+
+
+    function get_transaction(transaction_code) {
+        
+    }
 </script>
 @endsection
